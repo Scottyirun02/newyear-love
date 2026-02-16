@@ -82,9 +82,15 @@ body::before{
 
 h1{
   margin:14px 0 8px;
-  font-size: clamp(26px, 3.2vw, 44px);
-  line-height:1.15;
-  text-shadow: 0 8px 30px rgba(0,0,0,.25);
+  font-family: "ZCOOL KuaiLe", "Noto Serif SC", serif;
+  font-size: clamp(28px, 3.4vw, 48px);
+  line-height:1.12;
+  letter-spacing: .6px;
+  color: rgba(255,255,255,.95);
+  text-shadow:
+    0 2px 0 rgba(0,0,0,.20),
+    0 10px 35px rgba(0,0,0,.35),
+    0 0 22px rgba(247,215,116,.35);
 }
 
 .subtitle{
@@ -152,14 +158,18 @@ h1{
 }
 
 .wish-text{
+  font-family: "Ma Shan Zheng", "Noto Serif SC", serif;
   color: var(--text) !important;
-  font-size: 16px !important;
+  font-size: 18px !important;
+  line-height: 1.85 !important;
 }
 
 .sign{
-  margin-top:8px !important;
-  color: rgba(247,215,116,.92) !important;
+  font-family: "Ma Shan Zheng", "Noto Serif SC", serif;
+  margin-top:10px !important;
+  color: rgba(247,215,116,.95) !important;
   font-weight:700;
+  font-size: 18px;
 }
 
 .footer{
@@ -216,4 +226,5 @@ h1{
   position: relative;
   z-index: 1000;
 }
+
 
