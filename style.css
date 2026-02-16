@@ -202,5 +202,18 @@ h1{
 
 }
 
-#fx { position: fixed; inset: 0; pointer-events: none; z-index: 1; }
-.wrap { position: relative; z-index: 10; }
+#fx{
+  position: fixed !important;
+  inset: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  z-index: 999 !important;
+  pointer-events: none !important;
+}
+
+/* 卡片内容仍然可正常交互 */
+.wrap, .card{
+  position: relative;
+  z-index: 1000;
+}
+
