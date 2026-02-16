@@ -101,7 +101,7 @@ h1 .cn{
   margin-top:6px;
   font-family: "ZCOOL KuaiLe", serif;
   font-size: clamp(32px, 3.6vw, 52px);
-  color: #fff;
+  color: #f7d774;
   text-shadow:
     0 2px 0 rgba(0,0,0,.3),
     0 10px 30px rgba(0,0,0,.4),
@@ -174,7 +174,7 @@ h1 .cn{
 
 .wish-text{
   font-family: "Ma Shan Zheng", "Noto Serif SC", serif;
-  color: var(--text) !important;
+  color: rgba(247,215,116,.95) !important;
   font-size: 18px !important;
   line-height: 1.85 !important;
 }
@@ -256,6 +256,7 @@ h1 .cn{
   position: relative;
   z-index: 1000;
 }
+
 
 
 
