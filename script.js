@@ -89,9 +89,10 @@ function burst(x, y) {
 function loop() {
   ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
 
-  // 轻微拖影
-  ctx.fillStyle = "rgba(0,0,0,0.08)";
+  ctx.fillStyle = "rgba(0,0,0,0.18)";
   ctx.fillRect(0, 0, window.innerWidth, window.innerHeight);
+
+  ctx.globalCompositeOperation = "lighter"; // ✅ 发光叠加
 
   for (let i = particles.length - 1; i >= 0; i--) {
     const p = particles[i];
@@ -114,6 +115,7 @@ function loop() {
     ctx.fill();
   }
 
+  ctx.globalCompositeOperation = "source-over"; // ✅ 恢复
   requestAnimationFrame(loop);
 }
 loop();
@@ -133,4 +135,5 @@ window.addEventListener("pointerdown", (e) => {
   // 避免点到按钮也触发太多
   if (e.target.closest(".btn")) return;
   burst(e.clientX, e.clientY);
+
 });
