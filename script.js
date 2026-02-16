@@ -25,7 +25,6 @@ let playing = false;
 if (musicBtn && bgm) {
   musicBtn.addEventListener("click", async () => {
     try {
-      // 有些浏览器 source 存在但文件 404，这里简单提醒即可
       const src = bgm.querySelector("source")?.getAttribute("src");
       if (!src) {
         alert("你还没放音乐文件：把 music.mp3 放到同目录，并在 index.html 里加上 <source>。");
@@ -61,6 +60,7 @@ if (shareBtn) {
 }
 
 // ===== 烟花效果（Canvas）=====
+// 粉色浪漫：整体偏粉紫 + 柔光 + 慢一些 + 更梦幻的光晕
 const canvas = document.getElementById("fx");
 const ctx = canvas.getContext("2d");
 
@@ -78,41 +78,69 @@ resize();
 const particles = [];
 function rand(min, max) { return Math.random() * (max - min) + min; }
 
+// 粉紫色系（浪漫）：在 300°~360°（偏粉紫） + 0°~25°（偏玫红）之间取
+function romanticHue() {
+  return Math.random() < 0.72 ? rand(300, 360) : rand(0, 25);
+}
+
+// 爱心形状（轻量版）：偶尔给一点“心动感”
+function isHeart() {
+  return Math.random() < 0.12; // 12% 概率是爱心爆炸
+}
+
 function burst(x, y) {
-  const count = Math.floor(rand(120, 200)); // ✅ 更多粒子
+  const heart = isHeart();
+  const count = heart ? Math.floor(rand(140, 210)) : Math.floor(rand(90, 150));
+  const baseHue = romanticHue();
+
   for (let i = 0; i < count; i++) {
-    const a = rand(0, Math.PI * 2);
-    const s = rand(2.4, 8.8);              // ✅ 更猛的爆炸速度
+    let a, s;
+
+    if (heart) {
+      // 近似心形散开：用参数方程生成方向（不是精确，但很像“心”）
+      const t = rand(0, Math.PI * 2);
+      const hx = 16 * Math.pow(Math.sin(t), 3);
+      const hy = -(13 * Math.cos(t) - 5 * Math.cos(2*t) - 2 * Math.cos(3*t) - Math.cos(4*t));
+      a = Math.atan2(hy, hx);
+      s = rand(1.6, 4.8);
+    } else {
+      a = rand(0, Math.PI * 2);
+      s = rand(1.8, 6.2); // 比“震撼版”慢一点，更浪漫
+    }
+
     particles.push({
       x, y,
       vx: Math.cos(a) * s,
       vy: Math.sin(a) * s,
-      life: rand(55, 110),                 // ✅ 更长寿命（更有拖尾感）
+      life: rand(75, 140),    // 更长寿命，更梦幻拖尾
       age: 0,
-      size: rand(1.8, 3.8),                // ✅ 更大
-      hue: rand(0, 360),
+      size: rand(1.6, 3.4),
+      hue: baseHue + rand(-12, 12), // 同一束颜色更统一（粉紫）
     });
   }
 }
 
 function loop() {
-  // 轻微黑幕（让亮点更突出）
-  ctx.fillStyle = "rgba(0,0,0,0.28)";
+  // 更柔和的黑幕（别太黑，保留梦幻感）
+  ctx.fillStyle = "rgba(0,0,0,0.16)";
   ctx.fillRect(0, 0, window.innerWidth, window.innerHeight);
 
-  // 发光叠加
+  // 柔光叠加
   ctx.globalCompositeOperation = "lighter";
 
   for (let i = particles.length - 1; i >= 0; i--) {
     const p = particles[i];
     p.age++;
-    p.vy += 0.045;     // 重力（略增一点更像烟花下落）
-    p.vx *= 0.990;     // 阻尼
-    p.vy *= 0.990;
+
+    // 更轻的重力 + 更慢的阻尼（漂浮感）
+    p.vy += 0.028;
+    p.vx *= 0.992;
+    p.vy *= 0.992;
+
     p.x += p.vx;
     p.y += p.vy;
 
-    const t = 1 - p.age / p.life; // 0~1
+    const t = 1 - p.age / p.life;
     if (t <= 0) {
       particles.splice(i, 1);
       continue;
@@ -121,64 +149,68 @@ function loop() {
     const alpha = Math.max(0, t);
     const r = p.size;
 
-    // ✅ 光晕（更亮更梦幻）
+    // 梦幻光晕（更大、更柔）
     ctx.beginPath();
-    ctx.fillStyle = `hsla(${p.hue}, 100%, 75%, ${alpha * 0.55})`;
-    ctx.arc(p.x, p.y, r * 2.2, 0, Math.PI * 2);
+    ctx.fillStyle = `hsla(${p.hue}, 100%, 78%, ${alpha * 0.22})`;
+    ctx.arc(p.x, p.y, r * 4.2, 0, Math.PI * 2);
     ctx.fill();
 
-    // ✅ 核心亮点
+    // 第二层光晕（更亮一些）
     ctx.beginPath();
-    ctx.fillStyle = `hsla(${p.hue}, 100%, 82%, ${alpha})`;
+    ctx.fillStyle = `hsla(${p.hue}, 100%, 80%, ${alpha * 0.45})`;
+    ctx.arc(p.x, p.y, r * 2.4, 0, Math.PI * 2);
+    ctx.fill();
+
+    // 核心亮点
+    ctx.beginPath();
+    ctx.fillStyle = `hsla(${p.hue}, 100%, 84%, ${alpha})`;
     ctx.arc(p.x, p.y, r, 0, Math.PI * 2);
     ctx.fill();
   }
 
-  // 恢复默认混合模式
   ctx.globalCompositeOperation = "source-over";
   requestAnimationFrame(loop);
 }
 loop();
 
-// 点击“放烟花”
-const fireBtn = document.getElementById("fireBtn");
-if (fireBtn) {
-  fireBtn.addEventListener("click", () => {
-    // 连放 3 发（更爽）
-    for (let i = 0; i < 3; i++) {
-      setTimeout(() => {
-        burst(rand(80, window.innerWidth - 80), rand(120, window.innerHeight * 0.55));
-      }, i * 220);
-    }
-  });
+// ✅ 进入页面就一直循环放烟花（不需要按钮）
+// 说明：用 setInterval 持续发射；再做“开场小连发”
+let loopTimer = null;
+
+// 发射一发：位置偏上半屏更浪漫
+function shootOne() {
+  burst(
+    rand(80, window.innerWidth - 80),
+    rand(120, window.innerHeight * 0.52)
+  );
 }
 
-// ✅ 打开页面自动连放烟花（3轮，每轮3发）
-function autoFireworks() {
-  const rounds = 20;     // 想更久：改 6 或 8
-  const perRound = 3;
-  const gap = 250;
-
-  for (let r = 0; r < rounds; r++) {
-    setTimeout(() => {
-      for (let i = 0; i < perRound; i++) {
-        setTimeout(() => {
-          burst(
-            rand(80, window.innerWidth - 80),
-            rand(120, window.innerHeight * 0.55)
-          );
-        }, i * 220);
-      }
-    }, r * gap);
+// 开场：先来一小段连发（仪式感）
+function opening() {
+  for (let i = 0; i < 7; i++) {
+    setTimeout(shootOne, i * 260);
   }
 }
 
+// 持续：一直放（建议 420~650ms 之间）
+function startLoop() {
+  if (loopTimer) clearInterval(loopTimer);
+  loopTimer = setInterval(() => {
+    shootOne();
+
+    // 偶尔加一发“同点双爆”（更浪漫但不吵）
+    if (Math.random() < 0.22) {
+      setTimeout(() => burst(rand(80, innerWidth - 80), rand(120, innerHeight * 0.52)), 140);
+    }
+  }, 520);
+}
+
 window.addEventListener("load", () => {
-  setTimeout(autoFireworks, 450);
+  setTimeout(() => {
+    opening();
+    startLoop();
+  }, 350);
 });
 
-// 点击任意空白处也放烟花
-window.addEventListener("pointerdown", (e) => {
-  if (e.target.closest(".btn")) return; // 点按钮不额外触发
-  burst(e.clientX, e.clientY);
-});
+// （可选）如果你想完全禁止点击触发，就不要加 pointerdown 监听
+// 这里我不加，保证“只自动循环放”，符合你的要求。
